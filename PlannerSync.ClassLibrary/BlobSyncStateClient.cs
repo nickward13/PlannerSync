@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace PlannerSync.ClassLibrary
 {
-    public class SyncStateClient
+    internal class BlobSyncStateClient : ISyncStateClient
     {
         string storageConnectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
         string containerName = "syncstate";
