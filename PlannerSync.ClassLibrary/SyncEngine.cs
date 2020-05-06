@@ -14,6 +14,11 @@ namespace PlannerSync.ClassLibrary
 
             OutlookClient outlookClient = new OutlookClient();
             List<OutlookTask> outlookTasks = await outlookClient.GetTasksAsync();
+
+            SyncStateClient syncStateClient = new SyncStateClient();
+            List<OutlookTask> lastSyncOutlookTasks = await syncStateClient.GetSavedSyncStateAsync();
+
+            await syncStateClient.SaveSyncStateAsync(lastSyncOutlookTasks);
         }
     }
 }
