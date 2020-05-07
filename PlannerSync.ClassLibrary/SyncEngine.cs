@@ -19,16 +19,27 @@ namespace PlannerSync.ClassLibrary
             ISyncStateClient syncStateClient = new BlobSyncStateClient();
             List<OutlookTask> lastSyncOutlookTasks = await syncStateClient.GetSavedSyncStateAsync();
 
+            OutlookTask outlookTaskToAdd;
             foreach(PlannerTask plannerTask in plannerTasks)
             {
-                if(!lastSyncOutlookTasks.Exists(t => t.Subject == plannerTask.Title))
+                if(lastSyncOutlookTasks.Exists(
+                    t => t.Subject == plannerTask.Title && plannerTask.DueDateTime == null && t.DueDateTime == null
+                    ||
+                    t.Subject == plannerTask.Title && plannerTask.DueDateTime == t.DueDateTime.DateTime))
+                { 
+                } else
                 {
-                    lastSyncOutlookTasks.Add(new OutlookTask() { Subject = plannerTask.Title, DueDateTime = plannerTask.DueDateTime });
-                    // insert outlook task
-                } else if(!lastSyncOutlookTasks.Exists(t => t.DueDateTime == plannerTask.DueDateTime && t.Subject == plannerTask.Title))
-                {
-                    lastSyncOutlookTasks.Find(t => t.Subject == plannerTask.Title).DueDateTime = plannerTask.DueDateTime;
-                    // update outlook task
+                    if (plannerTask.DueDateTime == null)
+                    {
+                        outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title };
+                    }
+                    else
+                    {
+                        outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title, DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" } };
+                    }
+                    lastSyncOutlookTasks.Add(outlookTaskToAdd);
+                    await outlookClient.AddOutlookTaskAsync(outlookTaskToAdd);
+                    
                 }
             }
 
