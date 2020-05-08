@@ -8,6 +8,8 @@ namespace PlannerSync.ClassLibrary
 {
     public class PlannerTask
     {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
         [JsonPropertyName("title")]
         public string Title { get; set; }
         [JsonPropertyName("percentComplete")]

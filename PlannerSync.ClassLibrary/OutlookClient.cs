@@ -19,9 +19,11 @@ namespace PlannerSync.ClassLibrary
             return tasks;
         }
 
-        public async Task AddOutlookTaskAsync(OutlookTask outlookTask)
+        public async Task<OutlookTask> AddOutlookTaskAsync(OutlookTask outlookTask)
         {
-            await restClient.ApiPostAsync(addTaskRequestUri, outlookTask);
+            string response = await restClient.ApiPostAsync(addTaskRequestUri, outlookTask);
+            OutlookTask addedOutlookTask = JsonSerializer.Deserialize<OutlookTask>(response);
+            return addedOutlookTask;
         }
     }
 }

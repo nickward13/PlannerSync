@@ -17,33 +17,27 @@ namespace PlannerSync.ClassLibrary
             List<OutlookTask> outlookTasks = await outlookClient.GetTasksAsync();
 
             ISyncStateClient syncStateClient = new BlobSyncStateClient();
-            List<OutlookTask> lastSyncOutlookTasks = await syncStateClient.GetSavedSyncStateAsync();
+            List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
 
-            OutlookTask outlookTaskToAdd;
             foreach(PlannerTask plannerTask in plannerTasks)
             {
-                if(lastSyncOutlookTasks.Exists(
-                    t => t.Subject == plannerTask.Title && plannerTask.DueDateTime == null && t.DueDateTime == null
-                    ||
-                    t.Subject == plannerTask.Title && plannerTask.DueDateTime == t.DueDateTime.DateTime))
+                if(lastSyncedTasks.Exists(syncedTask => syncedTask.PlannerId == plannerTask.Id))
                 { 
+                    if(lastSyncedTasks.Find(syncedTask => syncedTask.PlannerId == plannerTask.Id).DueDate != plannerTask.DueDateTime)
+                    {
+                        // update outlook and synced task
+                    }
                 } else
                 {
-                    if (plannerTask.DueDateTime == null)
-                    {
-                        outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title };
-                    }
-                    else
-                    {
-                        outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title, DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" } };
-                    }
-                    lastSyncOutlookTasks.Add(outlookTaskToAdd);
-                    await outlookClient.AddOutlookTaskAsync(outlookTaskToAdd);
-                    
+                    OutlookTask outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title };
+                    if(plannerTask.DueDateTime != null)
+                        outlookTaskToAdd.DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" };
+                    outlookTaskToAdd = await outlookClient.AddOutlookTaskAsync(outlookTaskToAdd);
+                    lastSyncedTasks.Add(new SyncedTask() { Title = outlookTaskToAdd.Subject, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
                 }
             }
 
-            await syncStateClient.SaveSyncStateAsync(lastSyncOutlookTasks);
+            await syncStateClient.SaveSyncStateAsync(lastSyncedTasks);
         }
     }
 }

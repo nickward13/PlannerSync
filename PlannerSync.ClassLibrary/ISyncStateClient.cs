@@ -7,7 +7,7 @@ namespace PlannerSync.ClassLibrary
 {
     internal interface ISyncStateClient
     {
-        Task<List<OutlookTask>> GetSavedSyncStateAsync();
-        Task SaveSyncStateAsync(List<OutlookTask> outlookTasks);
+        Task<List<SyncedTask>> GetSavedSyncStateAsync();
+        Task SaveSyncStateAsync(List<SyncedTask> outlookTasks);
     }
 }

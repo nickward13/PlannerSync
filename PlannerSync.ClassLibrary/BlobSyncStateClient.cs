@@ -16,9 +16,9 @@ namespace PlannerSync.ClassLibrary
         string containerName = "syncstate";
         string blobName = "lastSyncState.json";
 
-        public async Task<List<OutlookTask>> GetSavedSyncStateAsync()
+        public async Task<List<SyncedTask>> GetSavedSyncStateAsync()
         {
-            List<OutlookTask> outlookTasks = new List<OutlookTask>();
+            List<SyncedTask> syncedTasks = new List<SyncedTask>();
 
             BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnectionString, containerName);
             await blobContainerClient.CreateIfNotExistsAsync();
@@ -29,18 +29,18 @@ namespace PlannerSync.ClassLibrary
                 BlobDownloadInfo lastSyncBlobDownloadInfo = await lastSyncStateBlobClient.DownloadAsync();
                 StreamReader streamReader = new StreamReader(lastSyncBlobDownloadInfo.Content);
                 string lastSyncTasks = streamReader.ReadToEnd();
-                outlookTasks = JsonSerializer.Deserialize<List<OutlookTask>>(lastSyncTasks);
+                syncedTasks = JsonSerializer.Deserialize<List<SyncedTask>>(lastSyncTasks);
             }
 
-            return outlookTasks;
+            return syncedTasks;
         }
         
-        public async Task SaveSyncStateAsync(List<OutlookTask> outlookTasks)
+        public async Task SaveSyncStateAsync(List<SyncedTask> syncedTasks)
         {
             BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnectionString, containerName);
             await blobContainerClient.CreateIfNotExistsAsync();
 
-            string outlookTasksJson = JsonSerializer.Serialize(outlookTasks);
+            string outlookTasksJson = JsonSerializer.Serialize(syncedTasks);
             byte[] outlookTasksByteArray = Encoding.UTF8.GetBytes(outlookTasksJson);
             MemoryStream outlookTasksStream = new MemoryStream(outlookTasksByteArray);
             
