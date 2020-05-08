@@ -11,6 +11,7 @@ namespace PlannerSync.ClassLibrary
         private RestClient restClient = new RestClient();
         private Uri getTasksRequestUri = new Uri(Environment.GetEnvironmentVariable("logic-get-outlook-tasks-url"));
         private Uri addTaskRequestUri = new Uri(Environment.GetEnvironmentVariable("logic-add-outlook-task-url"));
+        private Uri updateTaskRequestUri = new Uri(Environment.GetEnvironmentVariable("logic-update-outlook-task-url"));
 
         public async Task<List<OutlookTask>> GetTasksAsync()
         {
@@ -24,6 +25,11 @@ namespace PlannerSync.ClassLibrary
             string response = await restClient.ApiPostAsync(addTaskRequestUri, outlookTask);
             OutlookTask addedOutlookTask = JsonSerializer.Deserialize<OutlookTask>(response);
             return addedOutlookTask;
+        }
+
+        public async Task UpdateOutlookTaskAsync(OutlookTask outlookTask)
+        {
+            await restClient.ApiPostAsync(updateTaskRequestUri, outlookTask);
         }
     }
 }

@@ -18,14 +18,29 @@ namespace PlannerSync.ClassLibrary
 
             ISyncStateClient syncStateClient = new BlobSyncStateClient();
             List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
+            List<SyncedTask> syncedTasksToDelete = new List<SyncedTask>();
 
             foreach(PlannerTask plannerTask in plannerTasks)
             {
                 if(lastSyncedTasks.Exists(syncedTask => syncedTask.PlannerId == plannerTask.Id))
-                { 
-                    if(lastSyncedTasks.Find(syncedTask => syncedTask.PlannerId == plannerTask.Id).DueDate != plannerTask.DueDateTime)
+                {
+                    SyncedTask syncedTask = lastSyncedTasks.Find(st => st.PlannerId == plannerTask.Id);
+                    if (syncedTask.DueDate != plannerTask.DueDateTime)
                     {
-                        // update outlook and synced task
+                        if(outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
+                        {
+                            OutlookTask outlookTaskToUpdate = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId);
+                            if(plannerTask.DueDateTime == null)
+                            {
+                                outlookTaskToUpdate.DueDateTime = null;
+                            }
+                            else
+                            {
+                                outlookTaskToUpdate.DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" };
+                            }
+                            await outlookClient.UpdateOutlookTaskAsync(outlookTaskToUpdate);
+                            syncedTask.DueDate = plannerTask.DueDateTime;
+                        }
                     }
                 } else
                 {
@@ -35,6 +50,25 @@ namespace PlannerSync.ClassLibrary
                     outlookTaskToAdd = await outlookClient.AddOutlookTaskAsync(outlookTaskToAdd);
                     lastSyncedTasks.Add(new SyncedTask() { Title = outlookTaskToAdd.Subject, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
                 }
+            }
+
+            foreach(SyncedTask syncedTask in lastSyncedTasks)
+            {
+                if(!plannerTasks.Exists(pt => pt.Id == syncedTask.PlannerId))
+                {
+                    if(outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
+                    {
+                        OutlookTask outlookTaskToComplete = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId);
+                        outlookTaskToComplete.Status = "Completed";
+                        await outlookClient.UpdateOutlookTaskAsync(outlookTaskToComplete);
+                    }
+                    syncedTasksToDelete.Add(syncedTask);
+                }
+            }
+
+            foreach(SyncedTask syncedTaskToDelete in syncedTasksToDelete)
+            {
+                lastSyncedTasks.Remove(syncedTaskToDelete);
             }
 
             await syncStateClient.SaveSyncStateAsync(lastSyncedTasks);
