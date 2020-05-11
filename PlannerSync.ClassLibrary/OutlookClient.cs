@@ -27,6 +27,12 @@ namespace PlannerSync.ClassLibrary
             return addedOutlookTask;
         }
 
+        public async Task CompleteOutlookTaskAsync(OutlookTask outlookTask)
+        {
+            outlookTask.Status = "Completed";
+            await restClient.ApiPostAsync(updateTaskRequestUri, outlookTask);
+        }
+
         public async Task UpdateOutlookTaskAsync(OutlookTask outlookTask)
         {
             await restClient.ApiPostAsync(updateTaskRequestUri, outlookTask);

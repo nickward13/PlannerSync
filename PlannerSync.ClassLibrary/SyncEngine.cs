@@ -59,10 +59,20 @@ namespace PlannerSync.ClassLibrary
                     if(outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
                     {
                         OutlookTask outlookTaskToComplete = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId);
-                        outlookTaskToComplete.Status = "Completed";
-                        await outlookClient.UpdateOutlookTaskAsync(outlookTaskToComplete);
+                        await outlookClient.CompleteOutlookTaskAsync(outlookTaskToComplete);
                     }
                     syncedTasksToDelete.Add(syncedTask);
+                } else if (!outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
+                {
+                    PlannerTask plannerTaskToComplete = plannerTasks.Find(pt => pt.Id == syncedTask.PlannerId);
+                    await plannerClient.CompleteTaskAsync(plannerTaskToComplete);
+                    syncedTasksToDelete.Add(syncedTask);
+                } else if (outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime != syncedTask.DueDate)
+                {
+                    PlannerTask plannerTaskToUpdate = plannerTasks.Find(pt => pt.Id == syncedTask.PlannerId);
+                    plannerTaskToUpdate.DueDateTime = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime;
+                    await plannerClient.UpdateTaskAsync(plannerTaskToUpdate);
+                    syncedTask.DueDate = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime;
                 }
             }
 
