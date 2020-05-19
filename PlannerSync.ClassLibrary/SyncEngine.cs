@@ -47,7 +47,7 @@ namespace PlannerSync.ClassLibrary
                     OutlookTask outlookTaskToAdd = new OutlookTask() { Subject = plannerTask.Title };
                     if(plannerTask.DueDateTime != null)
                         outlookTaskToAdd.DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" };
-                    outlookTaskToAdd = await outlookClient.AddOutlookTaskAsync(outlookTaskToAdd);
+                    outlookTaskToAdd = await outlookClient.AddTaskAsync(outlookTaskToAdd);
                     lastSyncedTasks.Add(new SyncedTask() { Title = outlookTaskToAdd.Subject, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
                 }
             }

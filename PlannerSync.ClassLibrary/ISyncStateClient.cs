@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PlannerSync.ClassLibrary
 {
-    internal interface ISyncStateClient
+    public interface ISyncStateClient
     {
         Task<List<SyncedTask>> GetSavedSyncStateAsync();
         Task SaveSyncStateAsync(List<SyncedTask> outlookTasks);

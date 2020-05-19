@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlannerSync.ClassLibrary
 {
-    public class OutlookClient
+    public class OutlookClient : IOutlookClient
     {
         private RestClient restClient = new RestClient();
         private Uri getTasksRequestUri = new Uri(Environment.GetEnvironmentVariable("logic-get-outlook-tasks-url"));
@@ -20,7 +20,7 @@ namespace PlannerSync.ClassLibrary
             return tasks;
         }
 
-        public async Task<OutlookTask> AddOutlookTaskAsync(OutlookTask outlookTask)
+        public async Task<OutlookTask> AddTaskAsync(OutlookTask outlookTask)
         {
             string response = await restClient.ApiPostAsync(addTaskRequestUri, outlookTask);
             OutlookTask addedOutlookTask = JsonSerializer.Deserialize<OutlookTask>(response);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PlannerSync.ClassLibrary
 {
-    public class PlannerClient
+    public class PlannerClient : IPlannerClient
     {
         private RestClient restClient = new RestClient();
         private Uri getPlannerTasksRequestUri = new Uri(Environment.GetEnvironmentVariable("logic-get-planner-tasks-url"));
