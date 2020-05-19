@@ -10,6 +10,13 @@ namespace PlannerSync.XUnitTest
     {
         List<PlannerTask> plannerTasks = new List<PlannerTask>();
 
+        public void AddTask(PlannerTask plannerTask)
+        {
+            plannerTask.Id = Guid.NewGuid().ToString();
+            plannerTask.CreatedDateTime = DateTime.Now.ToString();
+            plannerTasks.Add(plannerTask);
+        }
+
         public Task CompleteTaskAsync(PlannerTask plannerTask)
         {
             throw new NotImplementedException();

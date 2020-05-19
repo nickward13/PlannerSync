@@ -17,6 +17,7 @@ namespace PlannerSync.ClassLibrary
 
             List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
             List<SyncedTask> syncedTasksToDelete = new List<SyncedTask>();
+            List<SyncedTask> syncedTasksToAdd = new List<SyncedTask>();
 
             foreach(PlannerTask plannerTask in plannerTasks)
             {
@@ -46,7 +47,7 @@ namespace PlannerSync.ClassLibrary
                     if(plannerTask.DueDateTime != null)
                         outlookTaskToAdd.DueDateTime = new OutlookDateTime() { DateTime = plannerTask.DueDateTime, Timezone = "UTC" };
                     outlookTaskToAdd = await outlookClient.AddTaskAsync(outlookTaskToAdd);
-                    lastSyncedTasks.Add(new SyncedTask() { Title = outlookTaskToAdd.Subject, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
+                    syncedTasksToAdd.Add(new SyncedTask() { Title = outlookTaskToAdd.Subject, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
                 }
             }
 
@@ -77,6 +78,11 @@ namespace PlannerSync.ClassLibrary
             foreach(SyncedTask syncedTaskToDelete in syncedTasksToDelete)
             {
                 lastSyncedTasks.Remove(syncedTaskToDelete);
+            }
+
+            foreach(SyncedTask syncedTaskToAdd in syncedTasksToAdd)
+            {
+                lastSyncedTasks.Add(syncedTaskToAdd);
             }
 
             await syncStateClient.SaveSyncStateAsync(lastSyncedTasks);

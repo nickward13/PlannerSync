@@ -10,9 +10,11 @@ namespace PlannerSync.XUnitTest
     {
         List<OutlookTask> outlookTasks = new List<OutlookTask>();
 
-        public Task<OutlookTask> AddTaskAsync(OutlookTask outlookTask)
+        public async Task<OutlookTask> AddTaskAsync(OutlookTask outlookTask)
         {
-            throw new NotImplementedException();
+            outlookTask.Id = Guid.NewGuid().ToString();
+            outlookTasks.Add(outlookTask);
+            return outlookTask;
         }
 
         public Task CompleteOutlookTaskAsync(OutlookTask outlookTask)
