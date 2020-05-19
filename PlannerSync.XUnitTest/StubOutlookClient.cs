@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PlannerSync.ClassLibrary;
@@ -27,9 +28,10 @@ namespace PlannerSync.XUnitTest
             return outlookTasks;
         }
 
-        public Task UpdateOutlookTaskAsync(OutlookTask outlookTask)
+        public async Task UpdateOutlookTaskAsync(OutlookTask outlookTask)
         {
-            throw new NotImplementedException();
+            var taskToUpdate = outlookTasks.First(t => t.Id == outlookTask.Id);
+            taskToUpdate = outlookTask;
         }
     }
 }

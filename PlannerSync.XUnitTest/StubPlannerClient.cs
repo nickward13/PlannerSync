@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PlannerSync.ClassLibrary;
@@ -27,9 +28,10 @@ namespace PlannerSync.XUnitTest
             return plannerTasks;
         }
 
-        public Task UpdateTaskAsync(PlannerTask plannerTask)
+        public async Task UpdateTaskAsync(PlannerTask plannerTask)
         {
-            throw new NotImplementedException();
+            var taskToUpdate = plannerTasks.First(t => t.Id == plannerTask.Id);
+            taskToUpdate = plannerTask;
         }
     }
 }

@@ -51,38 +51,9 @@ namespace PlannerSync.ClassLibrary
                 }
             }
 
-            foreach(SyncedTask syncedTask in lastSyncedTasks)
+            foreach(var syncedTask in syncedTasksToAdd)
             {
-                if(!plannerTasks.Exists(pt => pt.Id == syncedTask.PlannerId))
-                {
-                    if(outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
-                    {
-                        OutlookTask outlookTaskToComplete = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId);
-                        await outlookClient.CompleteOutlookTaskAsync(outlookTaskToComplete);
-                    }
-                    syncedTasksToDelete.Add(syncedTask);
-                } else if (!outlookTasks.Exists(ot => ot.Id == syncedTask.OutlookId))
-                {
-                    PlannerTask plannerTaskToComplete = plannerTasks.Find(pt => pt.Id == syncedTask.PlannerId);
-                    await plannerClient.CompleteTaskAsync(plannerTaskToComplete);
-                    syncedTasksToDelete.Add(syncedTask);
-                } else if (outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime != syncedTask.DueDate)
-                {
-                    PlannerTask plannerTaskToUpdate = plannerTasks.Find(pt => pt.Id == syncedTask.PlannerId);
-                    plannerTaskToUpdate.DueDateTime = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime;
-                    await plannerClient.UpdateTaskAsync(plannerTaskToUpdate);
-                    syncedTask.DueDate = outlookTasks.Find(ot => ot.Id == syncedTask.OutlookId).DueDateTime.DateTime;
-                }
-            }
-
-            foreach(SyncedTask syncedTaskToDelete in syncedTasksToDelete)
-            {
-                lastSyncedTasks.Remove(syncedTaskToDelete);
-            }
-
-            foreach(SyncedTask syncedTaskToAdd in syncedTasksToAdd)
-            {
-                lastSyncedTasks.Add(syncedTaskToAdd);
+                lastSyncedTasks.Add(syncedTask);
             }
 
             await syncStateClient.SaveSyncStateAsync(lastSyncedTasks);

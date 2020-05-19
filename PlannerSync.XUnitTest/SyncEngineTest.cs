@@ -15,7 +15,7 @@ namespace PlannerSync.XUnitTest
         StubSyncStateClient syncStateClient = new StubSyncStateClient();
 
         [Fact]
-        public async System.Threading.Tasks.Task SyncTasksAsync_NoTasks_SyncAsync()
+        public async System.Threading.Tasks.Task SyncTasksAsync_NoTasks_EqualTaskCount()
         {
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
 
@@ -25,12 +25,9 @@ namespace PlannerSync.XUnitTest
         }
 
         [Fact]
-        public async Task SyncTasksAsync_OnePlannerTask_SyncAsync()
+        public async Task SyncTasksAsync_OnePlannerTask_EqualTaskCount()
         {
-            plannerClient.AddTask(
-                new PlannerTask() {  
-                    PercentComplete = 0, Title = "A Task" 
-                });
+            AddPlannerTask("A Task");
 
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
 
@@ -40,20 +37,10 @@ namespace PlannerSync.XUnitTest
         }
 
         [Fact]
-        public async Task SyncTasksAsync_TwoPlannerTask_SyncAsync()
+        public async Task SyncTasksAsync_TwoPlannerTask_EqualTaskCount()
         {
-            plannerClient.AddTask(
-                new PlannerTask()
-                {
-                    PercentComplete = 0,
-                    Title = "A Task"
-                });
-            plannerClient.AddTask(
-                new PlannerTask()
-                {
-                    PercentComplete = 0,
-                    Title = "Another Task"
-                });
+            AddPlannerTask("A Task");
+            AddPlannerTask("Another task");
 
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
 
@@ -63,27 +50,59 @@ namespace PlannerSync.XUnitTest
         }
 
         [Fact]
-        public async Task SyncTasksAsync_TwoPlannerTask_OverTwoSyncAsync()
+        public async Task SyncTasksAsync_TwoPlannerTasksOverTwoSyncs_EqualTasks()
         {
-            plannerClient.AddTask(
-                new PlannerTask()
-                {
-                    PercentComplete = 0,
-                    Title = "A Task"
-                });
+            AddPlannerTask("A task");
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
-            plannerClient.AddTask(
-                new PlannerTask()
-                {
-                    PercentComplete = 0,
-                    Title = "Another Task"
-                });
+            AddPlannerTask("Another Task");
 
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
 
             int plannerTaskCount = (await plannerClient.GetTasksAsync()).Count;
             int outlookTaskCount = (await outlookClient.GetTasksAsync()).Count;
             Assert.Equal(plannerTaskCount, outlookTaskCount);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_ThreePlannerTasksOverThreeSyncs_EqualTasks()
+        {
+            AddPlannerTask("Task 1");
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+            AddPlannerTask("Task 2");
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+            AddPlannerTask("Task 3");
+
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+
+            int plannerTaskCount = (await plannerClient.GetTasksAsync()).Count;
+            int outlookTaskCount = (await outlookClient.GetTasksAsync()).Count;
+            Assert.Equal(plannerTaskCount, outlookTaskCount);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_UpdatePlannerTaskDueDate_DatesEqual()
+        {
+            AddPlannerTask("Task 1");
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+            var taskToUpdate = plannerClient.GetTasksAsync().Result[0];
+            taskToUpdate.DueDateTime = DateTime.Now.ToString();
+            await plannerClient.UpdateTaskAsync(taskToUpdate);
+
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+
+            string plannerTaskDueDate = plannerClient.GetTasksAsync().Result[0].DueDateTime;
+            string outlookTaskDueDate = outlookClient.GetTasksAsync().Result[0].DueDateTime.DateTime;
+            Assert.Equal(plannerTaskDueDate, outlookTaskDueDate);
+        }
+
+        private void AddPlannerTask(string title)
+        {
+            plannerClient.AddTask(
+                            new PlannerTask()
+                            {
+                                PercentComplete = 0,
+                                Title = title
+                            });
         }
     }
 }
