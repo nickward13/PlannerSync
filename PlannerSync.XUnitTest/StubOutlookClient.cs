@@ -8,6 +8,8 @@ namespace PlannerSync.XUnitTest
 {
     class StubOutlookClient : IOutlookClient
     {
+        List<OutlookTask> outlookTasks = new List<OutlookTask>();
+
         public Task<OutlookTask> AddTaskAsync(OutlookTask outlookTask)
         {
             throw new NotImplementedException();
@@ -18,9 +20,9 @@ namespace PlannerSync.XUnitTest
             throw new NotImplementedException();
         }
 
-        public Task<List<OutlookTask>> GetTasksAsync()
+        public async Task<List<OutlookTask>> GetTasksAsync()
         {
-            throw new NotImplementedException();
+            return outlookTasks;
         }
 
         public Task UpdateOutlookTaskAsync(OutlookTask outlookTask)

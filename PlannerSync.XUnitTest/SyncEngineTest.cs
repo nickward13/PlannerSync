@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using PlannerSync.ClassLibrary;
+using System.Runtime.CompilerServices;
 
 namespace PlannerSync.XUnitTest
 {
@@ -17,7 +18,9 @@ namespace PlannerSync.XUnitTest
 
             await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
 
-
+            int plannerTaskCount = (await plannerClient.GetTasksAsync()).Count;
+            int outlookTaskCount = (await outlookClient.GetTasksAsync()).Count;
+            Assert.Equal(plannerTaskCount, outlookTaskCount);
         }
         
     }

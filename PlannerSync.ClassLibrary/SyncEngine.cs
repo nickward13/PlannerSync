@@ -8,6 +8,7 @@ namespace PlannerSync.ClassLibrary
 {
     public class SyncEngine
     {
+        
         public static async Task SyncTasksAsync(IPlannerClient plannerClient, IOutlookClient outlookClient, ISyncStateClient syncStateClient)
         {
             List<PlannerTask> plannerTasks = await plannerClient.GetTasksAsync();

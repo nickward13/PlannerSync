@@ -8,14 +8,16 @@ namespace PlannerSync.XUnitTest
 {
     class StubSyncStateClient : ISyncStateClient
     {
-        public Task<List<SyncedTask>> GetSavedSyncStateAsync()
+        List<SyncedTask> syncedTasks = new List<SyncedTask>();
+
+        public async Task<List<SyncedTask>> GetSavedSyncStateAsync()
         {
-            throw new NotImplementedException();
+            return syncedTasks;
         }
 
-        public Task SaveSyncStateAsync(List<SyncedTask> outlookTasks)
+        public async Task SaveSyncStateAsync(List<SyncedTask> outlookTasks)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }

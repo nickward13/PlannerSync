@@ -8,14 +8,16 @@ namespace PlannerSync.XUnitTest
 {
     class StubPlannerClient : IPlannerClient
     {
+        List<PlannerTask> plannerTasks = new List<PlannerTask>();
+
         public Task CompleteTaskAsync(PlannerTask plannerTask)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<PlannerTask>> GetTasksAsync()
+        public async Task<List<PlannerTask>> GetTasksAsync()
         {
-            throw new NotImplementedException();
+            return plannerTasks;
         }
 
         public Task UpdateTaskAsync(PlannerTask plannerTask)
