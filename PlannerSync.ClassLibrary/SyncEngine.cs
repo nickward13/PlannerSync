@@ -8,15 +8,12 @@ namespace PlannerSync.ClassLibrary
 {
     public class SyncEngine
     {
-        public static async Task SyncTasksAsync()
+        public static async Task SyncTasksAsync(IPlannerClient plannerClient, IOutlookClient outlookClient, ISyncStateClient syncStateClient)
         {
-            PlannerClient plannerClient = new PlannerClient();
             List<PlannerTask> plannerTasks = await plannerClient.GetTasksAsync();
 
-            OutlookClient outlookClient = new OutlookClient();
             List<OutlookTask> outlookTasks = await outlookClient.GetTasksAsync();
 
-            ISyncStateClient syncStateClient = new BlobSyncStateClient();
             List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
             List<SyncedTask> syncedTasksToDelete = new List<SyncedTask>();
 

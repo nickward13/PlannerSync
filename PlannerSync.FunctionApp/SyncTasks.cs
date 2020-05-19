@@ -20,7 +20,7 @@ namespace PlannerSync.FunctionApp
         {
             log.LogInformation("SyncTasks function processed a request.");
 
-            await PlannerSync.ClassLibrary.SyncEngine.SyncTasksAsync();
+            //await PlannerSync.ClassLibrary.SyncEngine.SyncTasksAsync();
 
             log.LogInformation($"Finished");
 
