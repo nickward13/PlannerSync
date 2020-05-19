@@ -62,5 +62,28 @@ namespace PlannerSync.XUnitTest
             Assert.Equal(plannerTaskCount, outlookTaskCount);
         }
 
+        [Fact]
+        public async Task SyncTasksAsync_TwoPlannerTask_OverTwoSyncAsync()
+        {
+            plannerClient.AddTask(
+                new PlannerTask()
+                {
+                    PercentComplete = 0,
+                    Title = "A Task"
+                });
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+            plannerClient.AddTask(
+                new PlannerTask()
+                {
+                    PercentComplete = 0,
+                    Title = "Another Task"
+                });
+
+            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+
+            int plannerTaskCount = (await plannerClient.GetTasksAsync()).Count;
+            int outlookTaskCount = (await outlookClient.GetTasksAsync()).Count;
+            Assert.Equal(plannerTaskCount, outlookTaskCount);
+        }
     }
 }
