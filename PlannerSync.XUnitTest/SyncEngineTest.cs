@@ -141,7 +141,7 @@ namespace PlannerSync.XUnitTest
         }
 
         [Fact]
-        public async Task SyncTasksAsync_UpdatePrimaryDescription_DatesEqual()
+        public async Task SyncTasksAsync_UpdatePrimaryDescription_DescriptionsEqual()
         {
             await AddPlannerTaskAsync("Task 1");
             await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
@@ -162,6 +162,42 @@ namespace PlannerSync.XUnitTest
             await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
             Assert.Empty(_primaryClient.Tasks);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_UpdateSecondaryDueDate_DatesEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _secondaryClient.Tasks[0].DueDateTime = DateTime.Now;
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal(_primaryClient.Tasks[0].DueDateTime, _secondaryClient.Tasks[0].DueDateTime);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_UpdateSecondaryTitle_TitlesEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _secondaryClient.Tasks[0].Title = "Updated Title";
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal("Updated Title", _primaryClient.Tasks[0].Title);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_UpdateSecondaryDescription_DescriptionsEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _secondaryClient.Tasks[0].Description = "Updated Text";
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal("Updated Text", _primaryClient.Tasks[0].Description);
         }
 
         private async Task AddPlannerTaskAsync(string title)

@@ -42,6 +42,28 @@ namespace PlannerSync.ClassLibrary
                 }
             }
 
+            foreach(SyncTask task in secondarySyncTaskClient.Tasks)
+            {
+                if (lastSyncedTasks.Exists(st => st.SecondaryTaskId == task.Id))
+                {
+                    SyncedTask lastSyncedTask = lastSyncedTasks.Find(st => st.SecondaryTaskId == task.Id);
+                    if (!IsTaskContentEqual(task, lastSyncedTask))
+                    {
+                        lastSyncedTask.DueDateTime = task.DueDateTime;
+                        lastSyncedTask.Description = task.Description;
+                        lastSyncedTask.Title = task.Title;
+                        if (primarySyncTaskClient.Tasks.Exists(pt => pt.Id == lastSyncedTask.PrimaryTaskId))
+                        {
+                            SyncTask primaryTaskToUpdate = primarySyncTaskClient.Tasks.Find(pt => pt.Id == lastSyncedTask.PrimaryTaskId);
+                            primaryTaskToUpdate.DueDateTime = task.DueDateTime;
+                            primaryTaskToUpdate.Description = task.Description;
+                            primaryTaskToUpdate.Title = task.Title;
+                            await primarySyncTaskClient.UpdateTaskAsync(primaryTaskToUpdate);
+                        }
+                    }
+                }
+            }
+
             foreach(var syncedTask in lastSyncedTasks)
             {
                 if (!primarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.PrimaryTaskId))
