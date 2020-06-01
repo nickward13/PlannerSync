@@ -16,5 +16,7 @@ namespace PlannerSync.ClassLibrary
         public string SecondaryTaskId { get; set; }
         [JsonPropertyName("duedate")]
         public DateTime DueDateTime { get; set; }
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
     }
 }

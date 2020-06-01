@@ -24,15 +24,18 @@ namespace PlannerSync.ClassLibrary
                 } else
                 {
                     SyncedTask lastSyncedTask = lastSyncedTasks.Find(st => st.PrimaryTaskId == task.Id);
-                    if (task.DueDateTime != lastSyncedTask.DueDateTime)
+                    if (!IsTaskContentEqual(task, lastSyncedTask))
                     {
                         lastSyncedTask.DueDateTime = task.DueDateTime;
+                        lastSyncedTask.Description = task.Description;
+                        lastSyncedTask.Title = task.Title;
                         if (secondarySyncTaskClient.Tasks.Exists(ot => ot.Id == lastSyncedTask.SecondaryTaskId))
                         {
                             SyncTask secondaryTaskToUpdate = secondarySyncTaskClient.Tasks.Find(ot => ot.Id == lastSyncedTask.SecondaryTaskId);
                             secondaryTaskToUpdate.DueDateTime = task.DueDateTime;
+                            secondaryTaskToUpdate.Description = task.Description;
+                            secondaryTaskToUpdate.Title = task.Title;
                             await secondarySyncTaskClient.UpdateTaskAsync(secondaryTaskToUpdate);
-                            lastSyncedTask.DueDateTime = task.DueDateTime;
                         }
                     }
                 }
@@ -56,6 +59,16 @@ namespace PlannerSync.ClassLibrary
             }
 
             await syncStateClient.SaveSyncStateAsync(lastSyncedTasks);
+        }
+
+        private static bool IsTaskContentEqual(SyncTask referenceTask, SyncedTask taskToCompare)
+        {
+            if (referenceTask.Description == taskToCompare.Description
+                && referenceTask.DueDateTime == taskToCompare.DueDateTime
+                && referenceTask.Title == taskToCompare.Title)
+                return true;
+            else
+                return false;
         }
     }
 }

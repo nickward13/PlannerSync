@@ -127,6 +127,18 @@ namespace PlannerSync.XUnitTest
 
             Assert.Equal(_plannerClient.Tasks[0].DueDateTime, _outlookClient.Tasks[0].DueDateTime);
         }
+
+        [Fact]
+        public async Task SyncTasksAsync_UpdatePrimaryTitle_TitlesEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            _plannerClient.Tasks[0].Title = "Updated Title";
+
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.Equal("Updated Title", _outlookClient.Tasks[0].Title);
+        }
         
         private async Task AddPlannerTaskAsync(string title)
         {
