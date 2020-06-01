@@ -116,23 +116,18 @@ namespace PlannerSync.XUnitTest
             Assert.Equal(_plannerClient.Tasks[0].Title, _outlookClient.Tasks[0].Title);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task SyncTasksAsync_UpdatePlannerTaskDueDate_DatesEqual()
         {
-            AddPlannerTask("Task 1");
-            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
-            var taskToUpdate = plannerClient.GetTasksAsync().Result[0];
-            taskToUpdate.DueDateTime = DateTime.Now.ToString();
-            await plannerClient.UpdateTaskAsync(taskToUpdate);
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            _plannerClient.Tasks[0].DueDateTime = DateTime.Now;
 
-            await SyncEngine.SyncTasksAsync(plannerClient, outlookClient, syncStateClient);
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
 
-            string plannerTaskDueDate = plannerClient.GetTasksAsync().Result[0].DueDateTime;
-            string outlookTaskDueDate = outlookClient.GetTasksAsync().Result[0].DueDateTime.DateTime;
-            Assert.Equal(plannerTaskDueDate, outlookTaskDueDate);
+            Assert.Equal(_plannerClient.Tasks[0].DueDateTime, _outlookClient.Tasks[0].DueDateTime);
         }
-        */
-
+        
         private async Task AddPlannerTaskAsync(string title)
         {
             await _plannerClient.AddTaskAsync(
