@@ -11,76 +11,76 @@ namespace PlannerSync.XUnitTest
 {
     public class SyncEngineTest
     {
-        ISyncTaskClient _plannerClient = new StubSyncTaskClient();
-        ISyncTaskClient _outlookClient = new StubSyncTaskClient();
+        ISyncTaskClient _primaryClient = new StubSyncTaskClient();
+        ISyncTaskClient _secondaryClient = new StubSyncTaskClient();
         StubSyncStateClient _syncStateClient = new StubSyncStateClient();
 
         [Fact]
         public async Task SyncTasksAsync_NoTasks_EqualTaskCount()
         {
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(_plannerClient.Tasks.Count, _outlookClient.Tasks.Count);
+            Assert.Equal(_primaryClient.Tasks.Count, _secondaryClient.Tasks.Count);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_OnePlannerTask_EqualTaskCount()
+        public async Task SyncTasksAsync_OnePrimaryTask_EqualTaskCount()
         {
             await AddPlannerTaskAsync("A Task");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Single(_outlookClient.Tasks);
+            Assert.Single(_secondaryClient.Tasks);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_TwoPlannerTask_EqualTaskCount()
+        public async Task SyncTasksAsync_TwoPrimaryTask_EqualTaskCount()
         {
             await AddPlannerTaskAsync("A Task");
             await AddPlannerTaskAsync("Another task");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(2, _outlookClient.Tasks.Count);
+            Assert.Equal(2, _secondaryClient.Tasks.Count);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_TwoPlannerTasksOverTwoSyncs_EqualTasks()
+        public async Task SyncTasksAsync_TwoPrimaryTasksOverTwoSyncs_EqualTasks()
         {
             await AddPlannerTaskAsync("A task");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
             await AddPlannerTaskAsync("Another Task");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(2, _outlookClient.Tasks.Count);
+            Assert.Equal(2, _secondaryClient.Tasks.Count);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_ThreePlannerTasksOverThreeSyncs_EqualTasks()
+        public async Task SyncTasksAsync_ThreePrimaryTasksOverThreeSyncs_EqualTasks()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
             await AddPlannerTaskAsync("Task 2");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
             await AddPlannerTaskAsync("Task 3");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(3, _outlookClient.Tasks.Count);
+            Assert.Equal(3, _secondaryClient.Tasks.Count);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_AddThenRemovePrimaryTask_EqualTasks()
+        public async Task SyncTasksAsync_AddThenCompletePrimaryTask_EqualTasks()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            var taskToComplete = _plannerClient.Tasks.First();
-            await _plannerClient.CompleteTaskAsync(taskToComplete);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            var taskToComplete = _primaryClient.Tasks.First();
+            await _primaryClient.CompleteTaskAsync(taskToComplete);
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Empty(_outlookClient.Tasks);
+            Assert.Empty(_secondaryClient.Tasks);
         }
 
         [Fact]
@@ -88,12 +88,12 @@ namespace PlannerSync.XUnitTest
         {
             await AddPlannerTaskAsync("Task 1");
             await AddPlannerTaskAsync("Task 2");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            await _plannerClient.CompleteTaskAsync(_plannerClient.Tasks[1]);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            await _primaryClient.CompleteTaskAsync(_primaryClient.Tasks[1]);
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Single(_outlookClient.Tasks);
+            Assert.Single(_secondaryClient.Tasks);
         }
 
         [Fact]
@@ -101,9 +101,9 @@ namespace PlannerSync.XUnitTest
         {
             await AddPlannerTaskAsync("Task 1");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.NotEqual(_plannerClient.Tasks[0].Id, _outlookClient.Tasks[0].Id);
+            Assert.NotEqual(_primaryClient.Tasks[0].Id, _secondaryClient.Tasks[0].Id);
         }
 
         [Fact]
@@ -111,62 +111,62 @@ namespace PlannerSync.XUnitTest
         {
             await AddPlannerTaskAsync("Task 1");
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(_plannerClient.Tasks[0].Title, _outlookClient.Tasks[0].Title);
+            Assert.Equal(_primaryClient.Tasks[0].Title, _secondaryClient.Tasks[0].Title);
         }
 
         [Fact]
-        public async Task SyncTasksAsync_UpdatePlannerTaskDueDate_DatesEqual()
+        public async Task SyncTasksAsync_UpdatePrimaryDueDate_DatesEqual()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            _plannerClient.Tasks[0].DueDateTime = DateTime.Now;
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _primaryClient.Tasks[0].DueDateTime = DateTime.Now;
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal(_plannerClient.Tasks[0].DueDateTime, _outlookClient.Tasks[0].DueDateTime);
+            Assert.Equal(_primaryClient.Tasks[0].DueDateTime, _secondaryClient.Tasks[0].DueDateTime);
         }
 
         [Fact]
         public async Task SyncTasksAsync_UpdatePrimaryTitle_TitlesEqual()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            _plannerClient.Tasks[0].Title = "Updated Title";
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _primaryClient.Tasks[0].Title = "Updated Title";
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal("Updated Title", _outlookClient.Tasks[0].Title);
+            Assert.Equal("Updated Title", _secondaryClient.Tasks[0].Title);
         }
 
         [Fact]
         public async Task SyncTasksAsync_UpdatePrimaryDescription_DatesEqual()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            _plannerClient.Tasks[0].Description = "A new description";
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _primaryClient.Tasks[0].Description = "A new description";
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Equal("A new description", _outlookClient.Tasks[0].Description);
+            Assert.Equal("A new description", _secondaryClient.Tasks[0].Description);
         }
         
         [Fact]
         public async Task SyncTasksAsync_CompleteTaskInSecondary_TaskGoneInPrimary()
         {
             await AddPlannerTaskAsync("Task 1");
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
-            await _outlookClient.CompleteTaskAsync(_outlookClient.Tasks[0]);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            await _secondaryClient.CompleteTaskAsync(_secondaryClient.Tasks[0]);
 
-            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
 
-            Assert.Empty(_plannerClient.Tasks);
+            Assert.Empty(_primaryClient.Tasks);
         }
 
         private async Task AddPlannerTaskAsync(string title)
         {
-            await _plannerClient.AddTaskAsync(
+            await _primaryClient.AddTaskAsync(
                             new SyncTask()
                             {
                                 Title = title
