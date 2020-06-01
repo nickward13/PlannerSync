@@ -200,6 +200,34 @@ namespace PlannerSync.XUnitTest
             Assert.Equal("Updated Text", _primaryClient.Tasks[0].Description);
         }
 
+        [Fact]
+        public async Task SyncTasksAsync_AddTwoUpdateFirstDate_DatesMatch()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            _primaryClient.Tasks[0].DueDateTime = new DateTime(2020,06,01);
+            await AddPlannerTaskAsync("Task 2");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _primaryClient.Tasks[0].DueDateTime = new DateTime(2020,06,02);
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal(new DateTime(2020, 06, 02), _secondaryClient.Tasks[0].DueDateTime);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_AddTwoTasksUpdateBoth_PrimaryWins()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await AddPlannerTaskAsync("Task 2");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _secondaryClient.Tasks[0].Title = "Secondary Task";
+            _primaryClient.Tasks[0].Title = "Primary Task";
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal("Primary Task", _secondaryClient.Tasks[0].Title);
+        }
+
         private async Task AddPlannerTaskAsync(string title)
         {
             await _primaryClient.AddTaskAsync(
