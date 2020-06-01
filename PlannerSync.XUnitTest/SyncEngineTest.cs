@@ -83,6 +83,39 @@ namespace PlannerSync.XUnitTest
             Assert.Empty(_outlookClient.Tasks);
         }
 
+        [Fact]
+        public async Task SyncTasksAsync_AddTwoThenCompletePrimaryTask_TasksEqual1()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await AddPlannerTaskAsync("Task 2");
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await _plannerClient.CompleteTaskAsync(_plannerClient.Tasks[1]);
+
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.Single(_outlookClient.Tasks);
+        }
+
+        [Fact]
+        public async Task SyncTaskAsync_SyncTask_TaskIdsNotEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.NotEqual(_plannerClient.Tasks[0].Id, _outlookClient.Tasks[0].Id);
+        }
+
+        [Fact]
+        public async Task SyncTaskAsync_SyncTask_TaskTitlesAreEqual()
+        {
+            await AddPlannerTaskAsync("Task 1");
+
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.Equal(_plannerClient.Tasks[0].Title, _outlookClient.Tasks[0].Title);
+        }
+
         /*[Fact]
         public async Task SyncTasksAsync_UpdatePlannerTaskDueDate_DatesEqual()
         {
