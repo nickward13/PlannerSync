@@ -152,6 +152,18 @@ namespace PlannerSync.XUnitTest
             Assert.Equal("A new description", _outlookClient.Tasks[0].Description);
         }
         
+        [Fact]
+        public async Task SyncTasksAsync_CompleteTaskInSecondary_TaskGoneInPrimary()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+            await _outlookClient.CompleteTaskAsync(_outlookClient.Tasks[0]);
+
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.Empty(_plannerClient.Tasks);
+        }
+
         private async Task AddPlannerTaskAsync(string title)
         {
             await _plannerClient.AddTaskAsync(

@@ -12,7 +12,8 @@ namespace PlannerSync.ClassLibrary
         public static async Task SyncTasksAsync(ISyncTaskClient primarySyncTaskClient, ISyncTaskClient secondarySyncTaskClient, ISyncStateClient syncStateClient)
         {
             List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
-            List<SyncedTask> syncedTasksToDelete = new List<SyncedTask>();
+            List<SyncedTask> secondaryTasksToComplete = new List<SyncedTask>();
+            List<SyncedTask> primaryTasksToComplete = new List<SyncedTask>();
             List<SyncedTask> syncedTasksToAdd = new List<SyncedTask>();
 
             foreach(SyncTask task in primarySyncTaskClient.Tasks)
@@ -44,12 +45,20 @@ namespace PlannerSync.ClassLibrary
             foreach(var syncedTask in lastSyncedTasks)
             {
                 if (!primarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.PrimaryTaskId))
-                    syncedTasksToDelete.Add(syncedTask);
+                    secondaryTasksToComplete.Add(syncedTask);
+                if (!secondarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.SecondaryTaskId))
+                    primaryTasksToComplete.Add(syncedTask);
             }
 
-            foreach(var syncedTask in syncedTasksToDelete)
+            foreach(var syncedTask in secondaryTasksToComplete)
             {
                 await secondarySyncTaskClient.CompleteTaskAsync(secondarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.SecondaryTaskId));
+                lastSyncedTasks.Remove(syncedTask);
+            }
+
+            foreach(var syncedTask in primaryTasksToComplete)
+            {
+                await primarySyncTaskClient.CompleteTaskAsync(primarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.PrimaryTaskId));
                 lastSyncedTasks.Remove(syncedTask);
             }
 
