@@ -18,14 +18,18 @@ namespace PlannerSync.XUnitTest
 
         public async Task<SyncTask> AddTaskAsync(SyncTask syncTask)
         {
-            syncTask.Id = Guid.NewGuid().ToString();
-            Tasks.Add(syncTask);
-            return syncTask;
+            SyncTask newSyncTask = new SyncTask();
+            newSyncTask.Id = Guid.NewGuid().ToString();
+            newSyncTask.Description = syncTask.Description;
+            newSyncTask.DueDateTime = syncTask.DueDateTime;
+            newSyncTask.Title = syncTask.Title;
+            Tasks.Add(newSyncTask);
+            return newSyncTask;
         }
 
         public async Task CompleteTaskAsync(SyncTask syncTask)
         {
-            throw new NotImplementedException();
+            Tasks.Remove(syncTask);
         }
 
         public async Task UpdateTaskAsync(SyncTask syncTask)
