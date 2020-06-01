@@ -10,6 +10,19 @@ namespace PlannerSync.XUnitTest
 {
     public class SyncEngineTest
     {
+        ISyncTaskClient _plannerClient = new StubSyncTaskClient();
+        ISyncTaskClient _outlookClient = new StubSyncTaskClient();
+        StubSyncStateClient _syncStateClient = new StubSyncStateClient();
+
+        [Fact]
+        public async Task SyncTasksAsync_NoTasks_EqualTaskCount()
+        {
+            await SyncEngine.SyncTasksAsync(_plannerClient, _outlookClient, _syncStateClient);
+
+            Assert.Equal(_plannerClient.Tasks.Count, _outlookClient.Tasks.Count);
+        }
+
+        /*
         StubPlannerClient plannerClient = new StubPlannerClient();
         StubOutlookClient outlookClient = new StubOutlookClient();
         StubSyncStateClient syncStateClient = new StubSyncStateClient();
@@ -104,5 +117,6 @@ namespace PlannerSync.XUnitTest
                                 Title = title
                             });
         }
+        */
     }
 }

@@ -15,6 +15,6 @@ namespace PlannerSync.ClassLibrary
         [JsonPropertyName("outlook-id")]
         public string OutlookId { get; set; }
         [JsonPropertyName("duedate")]
-        public string DueDate { get; set; }
+        public DateTime DueDate { get; set; }
     }
 }
