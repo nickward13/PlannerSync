@@ -11,10 +11,10 @@ namespace PlannerSync.ClassLibrary
         [JsonPropertyName("title")]
         public string Title { get; set; }
         [JsonPropertyName("planner-id")]
-        public string PlannerId { get; set; }
+        public string PrimaryTaskId { get; set; }
         [JsonPropertyName("outlook-id")]
-        public string OutlookId { get; set; }
+        public string SecondaryTaskId { get; set; }
         [JsonPropertyName("duedate")]
-        public DateTime DueDate { get; set; }
+        public DateTime DueDateTime { get; set; }
     }
 }

@@ -15,35 +15,26 @@ namespace PlannerSync.ClassLibrary
             List<SyncedTask> syncedTasksToDelete = new List<SyncedTask>();
             List<SyncedTask> syncedTasksToAdd = new List<SyncedTask>();
 
-            foreach(SyncTask plannerTask in primarySyncTaskClient.Tasks)
+            foreach(SyncTask task in primarySyncTaskClient.Tasks)
             {
-                if(lastSyncedTasks.Exists(syncedTask => syncedTask.PlannerId == plannerTask.Id))
+                if(!lastSyncedTasks.Exists(t => t.PrimaryTaskId == task.Id))
                 {
-                    SyncedTask syncedTask = lastSyncedTasks.Find(st => st.PlannerId == plannerTask.Id);
-                    if (syncedTask.DueDate != plannerTask.DueDateTime)
-                    {
-                        if(secondarySyncTaskClient.Tasks.Exists(ot => ot.Id == syncedTask.OutlookId))
-                        {
-                            SyncTask outlookTaskToUpdate = secondarySyncTaskClient.Tasks.Find(ot => ot.Id == syncedTask.OutlookId);
-                            if(plannerTask.DueDateTime == null)
-                            {
-                                outlookTaskToUpdate.DueDateTime = DateTime.MinValue;
-                            }
-                            else
-                            {
-                                outlookTaskToUpdate.DueDateTime = plannerTask.DueDateTime;
-                            }
-                            await secondarySyncTaskClient.UpdateTaskAsync(outlookTaskToUpdate);
-                            syncedTask.DueDate = plannerTask.DueDateTime;
-                        }
-                    }
+                    SyncTask newTask = await secondarySyncTaskClient.AddTaskAsync(task);
+                    syncedTasksToAdd.Add(new SyncedTask() { Title = newTask.Title, SecondaryTaskId = newTask.Id, PrimaryTaskId = task.Id, DueDateTime = task.DueDateTime });
                 } else
                 {
-                    SyncTask outlookTaskToAdd = new SyncTask() { Title = plannerTask.Title };
-                    if (plannerTask.DueDateTime != null)
-                        outlookTaskToAdd.DueDateTime = plannerTask.DueDateTime;
-                    outlookTaskToAdd = await secondarySyncTaskClient.AddTaskAsync(outlookTaskToAdd);
-                    syncedTasksToAdd.Add(new SyncedTask() { Title = outlookTaskToAdd.Title, OutlookId = outlookTaskToAdd.Id, PlannerId = plannerTask.Id, DueDate = plannerTask.DueDateTime});
+                    SyncedTask lastSyncedTask = lastSyncedTasks.Find(st => st.PrimaryTaskId == task.Id);
+                    if (task.DueDateTime != lastSyncedTask.DueDateTime)
+                    {
+                        lastSyncedTask.DueDateTime = task.DueDateTime;
+                        if (secondarySyncTaskClient.Tasks.Exists(ot => ot.Id == lastSyncedTask.SecondaryTaskId))
+                        {
+                            SyncTask secondaryTaskToUpdate = secondarySyncTaskClient.Tasks.Find(ot => ot.Id == lastSyncedTask.SecondaryTaskId);
+                            secondaryTaskToUpdate.DueDateTime = task.DueDateTime;
+                            await secondarySyncTaskClient.UpdateTaskAsync(secondaryTaskToUpdate);
+                            lastSyncedTask.DueDateTime = task.DueDateTime;
+                        }
+                    }
                 }
             }
 
