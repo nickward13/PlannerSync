@@ -38,6 +38,18 @@ namespace PlannerSync.ClassLibrary
                 }
             }
 
+            foreach(var syncedTask in lastSyncedTasks)
+            {
+                if (!primarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.PrimaryTaskId))
+                    syncedTasksToDelete.Add(syncedTask);
+            }
+
+            foreach(var syncedTask in syncedTasksToDelete)
+            {
+                await secondarySyncTaskClient.CompleteTaskAsync(secondarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.SecondaryTaskId));
+                lastSyncedTasks.Remove(syncedTask);
+            }
+
             foreach(var syncedTask in syncedTasksToAdd)
             {
                 lastSyncedTasks.Add(syncedTask);
