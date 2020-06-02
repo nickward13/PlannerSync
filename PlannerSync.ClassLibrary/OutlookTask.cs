@@ -17,6 +17,8 @@ namespace PlannerSync.ClassLibrary
         public OutlookDateTime DueDateTime { get; set; }
         [JsonPropertyName("startDateTime")]
         public OutlookDateTime StartDateTime { get; set; }
+        [JsonPropertyName("body")]
+        public OutlookTaskBody Body { get; set; }
     }
 
     public class OutlookDateTime
@@ -25,5 +27,13 @@ namespace PlannerSync.ClassLibrary
         public string DateTime { get; set; }
         [JsonPropertyName("timeZone")]
         public string Timezone { get; set; }
+    }
+
+    public class OutlookTaskBody
+    {
+        [JsonPropertyName("contentType")]
+        public string ContentType { get; set; }
+        [JsonPropertyName("content")]
+        public string Content { get; set; }
     }
 }

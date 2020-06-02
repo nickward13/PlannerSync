@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PlannerSync.ClassLibrary
 {
-    public interface ISyncTaskClient
+    public interface ITaskSyncable
     {
         List<SyncTask> Tasks { get; set; }
         

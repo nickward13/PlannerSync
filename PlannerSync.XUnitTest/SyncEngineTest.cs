@@ -11,8 +11,8 @@ namespace PlannerSync.XUnitTest
 {
     public class SyncEngineTest
     {
-        ISyncTaskClient _primaryClient = new StubSyncTaskClient();
-        ISyncTaskClient _secondaryClient = new StubSyncTaskClient();
+        ITaskSyncable _primaryClient = new StubSyncTaskClient();
+        ITaskSyncable _secondaryClient = new StubSyncTaskClient();
         StubSyncStateClient _syncStateClient = new StubSyncStateClient();
 
         [Fact]

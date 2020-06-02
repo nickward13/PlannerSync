@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PlannerSync.XUnitTest
 {
-    class StubSyncTaskClient : ISyncTaskClient
+    class StubSyncTaskClient : ITaskSyncable
     {
         public List<SyncTask> Tasks { get; set; }
 

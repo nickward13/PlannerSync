@@ -9,7 +9,7 @@ namespace PlannerSync.ClassLibrary
     public class SyncEngine
     {
         
-        public static async Task SyncTasksAsync(ISyncTaskClient primarySyncTaskClient, ISyncTaskClient secondarySyncTaskClient, ISyncStateClient syncStateClient)
+        public static async Task SyncTasksAsync(ITaskSyncable primarySyncTaskClient, ITaskSyncable secondarySyncTaskClient, ISyncStateClient syncStateClient)
         {
             List<SyncedTask> lastSyncedTasks = await syncStateClient.GetSavedSyncStateAsync();
             List<SyncedTask> secondaryTasksToComplete = new List<SyncedTask>();
