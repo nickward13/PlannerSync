@@ -228,6 +228,35 @@ namespace PlannerSync.XUnitTest
             Assert.Equal("Primary Task", _secondaryClient.Tasks[0].Title);
         }
 
+        [Fact]
+        public async Task SyncTasksAsync_AddThreePrimaryUpdateTwo_AllAreEqual()
+        {
+            for(int i=1; i < 4; i++)
+                await AddPlannerTaskAsync($"Task {i.ToString()}");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            _primaryClient.Tasks[0].Title = "Task 1 updated";
+            _secondaryClient.Tasks[1].Title = "Task 2 updated";
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Equal("Task 1 updated", _secondaryClient.Tasks[0].Title);
+            Assert.Equal("Task 2 updated", _primaryClient.Tasks[1].Title);
+        }
+
+        [Fact]
+        public async Task SyncTasksAsync_AddTaskDeleteBoth_AllListsAreEmpty()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            await _primaryClient.CompleteTaskAsync(_primaryClient.Tasks[0]);
+            await _secondaryClient.CompleteTaskAsync(_secondaryClient.Tasks[0]);
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Empty(_primaryClient.Tasks);
+            Assert.Empty(_secondaryClient.Tasks);
+        }
+
         private async Task AddPlannerTaskAsync(string title)
         {
             await _primaryClient.AddTaskAsync(

@@ -74,14 +74,18 @@ namespace PlannerSync.ClassLibrary
 
             foreach(var syncedTask in secondaryTasksToComplete)
             {
-                await secondarySyncTaskClient.CompleteTaskAsync(secondarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.SecondaryTaskId));
-                lastSyncedTasks.Remove(syncedTask);
+                if(secondarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.SecondaryTaskId))
+                    await secondarySyncTaskClient.CompleteTaskAsync(secondarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.SecondaryTaskId));
+                if(lastSyncedTasks.Contains(syncedTask))
+                    lastSyncedTasks.Remove(syncedTask);
             }
 
             foreach(var syncedTask in primaryTasksToComplete)
             {
-                await primarySyncTaskClient.CompleteTaskAsync(primarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.PrimaryTaskId));
-                lastSyncedTasks.Remove(syncedTask);
+                if(primarySyncTaskClient.Tasks.Exists(t => t.Id == syncedTask.PrimaryTaskId))
+                    await primarySyncTaskClient.CompleteTaskAsync(primarySyncTaskClient.Tasks.First(t => t.Id == syncedTask.PrimaryTaskId));
+                if(lastSyncedTasks.Contains(syncedTask))
+                    lastSyncedTasks.Remove(syncedTask);
             }
 
             foreach(var syncedTask in syncedTasksToAdd)
