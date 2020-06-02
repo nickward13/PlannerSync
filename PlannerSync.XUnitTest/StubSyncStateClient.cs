@@ -8,7 +8,7 @@ namespace PlannerSync.XUnitTest
 {
     class StubSyncStateClient : ISyncStateClient
     {
-        List<SyncedTask> syncedTasks = new List<SyncedTask>();
+        public List<SyncedTask> syncedTasks = new List<SyncedTask>();
 
         public async Task<List<SyncedTask>> GetSavedSyncStateAsync()
         {

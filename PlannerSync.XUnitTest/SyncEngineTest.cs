@@ -257,6 +257,19 @@ namespace PlannerSync.XUnitTest
             Assert.Empty(_secondaryClient.Tasks);
         }
 
+        [Fact]
+        public async Task SyncTasksAsync_AddTaskDeleteBoth_LastSyncTasksEmpty()
+        {
+            await AddPlannerTaskAsync("Task 1");
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+            await _primaryClient.CompleteTaskAsync(_primaryClient.Tasks[0]);
+            await _secondaryClient.CompleteTaskAsync(_secondaryClient.Tasks[0]);
+
+            await SyncEngine.SyncTasksAsync(_primaryClient, _secondaryClient, _syncStateClient);
+
+            Assert.Empty(_syncStateClient.syncedTasks);
+        }
+
         private async Task AddPlannerTaskAsync(string title)
         {
             await _primaryClient.AddTaskAsync(
